@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Chat Room</title>
+  </head>
+  <body>
+    <h1>Logged in as: {{sender}}</h1>
+    <textarea id="chat-log" cols="100" rows="20"></textarea><br />
+    <input id="chat-message-input" type="text" size="100" /><br />
+    <input id="chat-message-submit" type="button" value="Send" />
+    {{ username|json_script:"username" }}
+    {{sender|json_script:"sender"}}
+    {{thread_id|json_script:"thread_id"}}
+    {{thread|json_script:"thread"}}
+    <script>
+      const username = JSON.parse(
+        document.getElementById("username").textContent
+      );
+      const sender = JSON.parse(document.getElementById("sender").textContent)
+      const thread_id = JSON.parse(document.getElementById("thread_id").textContent)
+      let chatSocket = new WebSocket(
+        "ws://" + window.location.host + "/ws/chat/" + username + "/"
+      );
+      
+      let submitForm = document.querySelector("#chat-message-submit");
+      chatSocket.onopen = async (event) => {
+        console.log("Connection open", event);
+      };
+
+      chatSocket.onmessage = async (event) => {
+        console.log("Message", event);
+        let data = JSON.parse(event.data)
+        let response = JSON.parse(data.text)
+        let message = response
+        document.querySelector('#chat-log').value += ('[' + message.sender + ']:' + message.message + '\n');
+      };
+
+      chatSocket.onclose = async (event) => {
+        console.log("close", event);
+      };
+
+      submitForm.addEventListener("click", (event) => {
+        event.preventDefault();
+        let messageInputDom = document.querySelector("#chat-message-input");
+        let message = messageInputDom.value;
+        let data = {
+          message: message, 
+          'sender':sender,
+          'receiver':username,
+          'thread_id':thread_id
+        };
+        data = JSON.stringify(data);
+        chatSocket.send(data);
+        messageInputDom.value = "";
+      });
+    </script>
+  </body>
+</html>

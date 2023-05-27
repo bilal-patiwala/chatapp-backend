@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>Chat Rooms</title>
+</head>
+<body>
+    To which user you would like to chat with?<br>
+    <input id="user-name-input" type="text" placeholder="Enter user name"><br>
+    <input id="user-name-submit" type="button" value="Enter">
+
+    <a href="{% url 'logout' %}">logout</a>
+
+    <script>
+        document.querySelector('#user-name-input').focus();
+        document.querySelector('#user-name-input').onkeyup = function(e) {
+            if (e.keyCode === 13) {  // enter, return
+                document.querySelector('#user-name-submit').click();
+            }
+        };
+
+        document.querySelector('#user-name-submit').onclick = function(e) {
+            var userName = document.querySelector('#user-name-input').value;
+            window.location.pathname = userName + '/';
+        };
+    </script>
+</body>
+</html>
